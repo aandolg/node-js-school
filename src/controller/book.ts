@@ -57,4 +57,38 @@ export default class BookController {
             ctx.body = book;
         }
     }
+
+    public static async updateBook (ctx: BaseContext) {
+        const bookRepository: Repository<Book> = getManager().getRepository(Book);
+        const bookToBeUpdated: Book = new Book();
+        bookToBeUpdated.id = +ctx.params.idBook || 0;
+        bookToBeUpdated.name = ctx.request.body.name;
+        bookToBeUpdated.description = ctx.request.body.description;
+        bookToBeUpdated.userId = +ctx.params.id;
+        // validate book entity
+        const errors: ValidationError[] = await validate(bookToBeUpdated); // errors is an array of validation errors
+
+        if (errors.length > 0) {
+            // return BAD REQUEST status code and errors array
+            ctx.status = 400;
+            ctx.body = errors;
+        } else if ( !await bookRepository.findOne({id: bookToBeUpdated.id, 'userId': bookToBeUpdated.userId})) {
+            // check if a book with the specified id exists
+            // return a BAD REQUEST status code and error message
+            ctx.status = 400;
+            ctx.body = 'The book you are trying to update doesn\'t exist in the db';
+        } else if (
+            await bookRepository.findOne({ id: Not(Equal(bookToBeUpdated.id)) , name: bookToBeUpdated.name})
+        ) {
+            // return BAD REQUEST status code and email already exists error
+            ctx.status = 400;
+            ctx.body = 'The specified name already exists';
+        } else {
+            // save the book contained in the PUT body
+            const book = await bookRepository.save(bookToBeUpdated);
+            // return CREATED status code and updated book
+            ctx.status = 201;
+            ctx.body = book;
+        }
+    }
   }

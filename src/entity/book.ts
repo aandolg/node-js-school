@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Length, IsNotEmpty, IsDate } from 'class-validator';
+import { Length, IsNotEmpty} from 'class-validator';
 import {User} from "./user";
 
 @Entity()
@@ -20,7 +20,6 @@ export class Book {
     description: string;
 
     @Column({default: () => `now()`})
-    @IsDate()
     date: string
 
     @ManyToOne(type => User, user => user.books)

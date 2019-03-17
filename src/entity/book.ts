@@ -22,6 +22,9 @@ export class Book {
     @Column({default: () => `now()`})
     date: string
 
+    @Column({ nullable: true })
+    userId = undefined
+
     @ManyToOne(type => User, user => user.books)
     user: User;
 }

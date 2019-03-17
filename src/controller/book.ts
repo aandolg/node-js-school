@@ -6,6 +6,21 @@ import { User } from '../entity/user';
 
 export default class BookController {
 
+    public static async getBooksByUserId (ctx: BaseContext) {
+        const userRepository: Repository<User> = getManager().getRepository(User);
+        const user: User = await userRepository.findOne(+ctx.params.id || 0);
+        if (user === undefined) {
+            ctx.status = 400;
+            ctx.body = 'User doesnt exist';
+            return ctx;
+        }
+        const bookRepository: Repository<Book> = getManager().getRepository(Book);
+        const books: Book[] = await bookRepository.find({userId: ctx.params.id});
+        // return OK status code and loaded users array
+        ctx.status = 200;
+        ctx.body = books;
+    }
+
     public static async createBook (ctx: BaseContext) {
         const  userRepository: Repository<User> = getManager().getRepository(User);
         const user: User = await userRepository.findOne(+ctx.request.body.userId || 0);

@@ -91,4 +91,19 @@ export default class BookController {
             ctx.body = book;
         }
     }
+
+    public static async deleteBook (ctx: BaseContext) {
+        const bookRepository = getManager().getRepository(Book);
+        const bookToRemove: Book = await bookRepository.findOne({id: +ctx.params.idBook || 0, 'userId': ctx.params.id});
+        if (!bookToRemove) {
+            ctx.status = 400;
+            ctx.body = 'The book you are trying to delete doesn\'t exist in the db';
+        } else if (+ctx.params.id !== +bookToRemove.userId) {
+            ctx.status = 403;
+            ctx.body = 'A book can only be deleted by himself';
+        } else {
+            await bookRepository.remove(bookToRemove);
+            ctx.status = 204;
+        }
+    }
   }
